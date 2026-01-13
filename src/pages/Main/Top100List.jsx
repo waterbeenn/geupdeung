@@ -1,5 +1,10 @@
+import TopItem from './TopItem';
 const Top100List = () => {
-    return <div></div>;
+    return (
+        <ul>
+            <TopItem />
+        </ul>
+    );
 };
 
 export default Top100List;

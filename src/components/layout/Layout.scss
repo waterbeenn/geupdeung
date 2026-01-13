@@ -1,0 +1,13 @@
+.layout-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; // 화면 전체 높이를 차지하도록 설정
+
+    .content-area {
+        flex: 1; // Header와 Footer를 제외한 나머지 모든 공간을 차지
+        width: 100%;
+        max-width: 1200px; // 데스크탑 기준 중앙 정렬 너비
+        margin: 0 auto;
+        padding: 20px;
+    }
+}
