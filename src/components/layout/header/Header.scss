@@ -1,6 +1,9 @@
 $primary-blue: #2563eb;
 $border-color: #e5e7eb;
 $text-main: #1f2937;
+$market-open: #059669;
+$market-before: #d97706;
+$market-closed: #6b7280;
 
 .main-header {
     width: 100%;
@@ -51,17 +54,20 @@ $text-main: #1f2937;
                     transition: color 0.2s ease;
 
                     &:hover {
-                        color: #2563eb; // 강조 색상으로 변경
+                        color: $primary-blue;
+                    }
+
+                    &.active {
+                        color: $primary-blue;
                     }
                 }
             }
         }
     }
 
-    .status {
+    .status-container {
         display: flex;
-        align-items: center;
-        gap: 16px;
+        gap: 12px;
 
         .market-status {
             display: flex;
@@ -69,26 +75,39 @@ $text-main: #1f2937;
             gap: 6px;
             font-size: 0.8rem;
             font-weight: 600;
-            color: #059669; // 초록색 (개장 상태)
-            background-color: #ecfdf5;
             padding: 4px 10px;
             border-radius: 20px;
+            background-color: #f3f4f6;
 
             .dot {
-                width: 6px;
-                height: 6px;
-                background-color: #059669;
+                width: 7px;
+                height: 7px;
                 border-radius: 50%;
+                background-color: #9ca3af;
             }
-        }
 
-        .icon-btn {
-            background: none;
-            border: none;
-            color: #4b5563;
-            cursor: pointer;
-            &:hover {
-                color: $primary-blue;
+            &.open {
+                color: $market-open;
+                background-color: #ecfdf5;
+                .dot {
+                    background-color: $market-open;
+                }
+            }
+
+            &.before {
+                color: $market-before;
+                background-color: #fffbeb;
+                .dot {
+                    background-color: $market-before;
+                }
+            }
+
+            &.closed {
+                color: $market-closed;
+                background-color: #f3f4f6;
+                .dot {
+                    background-color: $market-closed;
+                }
             }
         }
     }
