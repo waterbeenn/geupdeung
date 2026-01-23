@@ -1,0 +1,168 @@
+$primary-blue: #2563eb;
+$text-main: #1f2937;
+$text-sub: #9ca3af;
+$bg-hover: #f9fafb;
+$bg-light: #f9fafb;
+$up-red: #ef4444; // 상승 (Red)
+$down-blue: #3b82f6; // 하락 (Blue)
+$zero-gray: #6b7280; // 보합 (Gray)
+
+
+.top100-item {
+    display: grid;
+    // 순위 | 종목명 | 현재가 | 등락 순으로 열 너비 배분
+    grid-template-columns: 50px 1fr 120px 100px;
+    align-items: center;
+    padding: 14px 20px;
+    background-color: #ffffff;
+    border-bottom: 1px solid #f3f4f6; // 구분선
+    transition: all 0.2s ease;
+    cursor: pointer;
+
+    &:hover {
+        background-color: $bg-hover;
+        // 살짝 앞으로 튀어나오는 느낌보다는 배경색과 텍스트 강조로 깔끔하게!
+        .name {
+            color: $primary-blue;
+        }
+    }
+
+    .rank {
+        font-weight: 700;
+        color: $text-main;
+        font-size: 0.95rem;
+    }
+
+    .name-group {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+
+        .name {
+            font-weight: 600;
+            color: $text-main;
+            font-size: 0.95rem;
+        }
+        .code {
+            font-size: 0.75rem;
+            color: $text-sub;
+            text-transform: uppercase;
+        }
+    }
+
+    .price {
+        font-weight: 700;
+        color: $text-main;
+        text-align: right;
+        padding-right: 20px;
+    }
+
+    .change-group {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        font-weight: 600;
+
+        // 상승일 때
+        &.up {
+            color: $up-red;
+        }
+
+        // 하락일 때
+        &.down {
+            color: $down-blue;
+        }
+
+        // 보합(0)일 때
+        &.zero {
+            color: $zero-gray;
+        }
+
+        .change {
+            font-size: 0.95rem;
+        }
+
+        .percent {
+            font-size: 0.8rem;
+            margin-top: 2px;
+        }
+    }
+
+    // 첫 번째 아이템(1위)에 대한 특별 강조 (선택 사항)
+    &:first-child {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+}
+
+.top100-header {
+    display: grid;
+    // 아이템과 동일한 비율: 순위(50px) | 종목명(1fr) | 현재가(120px) | 등락(100px)
+    grid-template-columns: 50px 1fr 120px 100px;
+    align-items: center;
+    padding: 12px 20px;
+    background-color: $bg-light; // 헤더 부분은 살짝 회색조로 구분
+    border-bottom: 1px solid #e5e7eb;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+
+    div {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: $text-sub;
+        letter-spacing: -0.02em;
+    }
+
+    .col-price {
+        text-align: right;
+        padding-right: 20px;
+    }
+
+    .col-change {
+        text-align: right;
+    }
+}
+
+.top100-list-container {
+    background-color: #ffffff;
+    border-radius: 16px;
+    overflow: hidden; // 내부 헤더/아이템의 모서리가 삐져나오지 않게 함
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    border: 1px solid #f3f4f6;
+}
+
+
+.top100-section {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: $text-main;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        letter-spacing: -0.03em;
+
+        // 타이틀 왼쪽에 파란색 포인트 바 추가
+        &::before {
+            content: '';
+            display: block;
+            width: 6px;
+            height: 24px;
+            background-color: $primary-blue;
+            border-radius: 4px;
+        }
+
+        // '오늘의' 부분만 작게 하고 싶을 때 유용한 서브 텍스트 스타일 (선택 사항)
+        span {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: $text-sub;
+            margin-left: 8px;
+        }
+    }
+}
