@@ -1,3 +1,5 @@
+@use 'sass:color';
+
 $primary-blue: #2563eb;
 $text-main: #1f2937;
 $text-sub: #6b7280;
@@ -235,7 +237,7 @@ body {
 
         &:hover {
             background-color: $gray-light;
-            border-color: darken($border-color, 10%);
+            border-color: color.adjust($border-color, $lightness: -10%);
         }
 
         &.active {

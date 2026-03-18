@@ -1,21 +1,22 @@
-'use client';
-
-import { useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
 import NewsList from '../../components/news/NewsList';
 
-export default function Page() {
-    const searchParams = useSearchParams();
-    const query = searchParams.get('q');
+const getQueryValue = (value) => {
+    if (Array.isArray(value)) {
+        return value[0] || null;
+    }
 
-    useEffect(() => {
-        window.scrollTo(0, 0);
-    }, []);
+    return value || null;
+};
+
+export default async function Page({ searchParams }) {
+    const resolvedSearchParams = await searchParams;
+    const query = getQueryValue(resolvedSearchParams?.q);
+
     return (
         <main>
             {query && (
                 <div className="search-query-header">
-                    <h2><span>'{query}'</span> 관련 기사</h2>
+                    <h2><span>{query}</span> 관련 기사</h2>
                 </div>
             )}
             <NewsList isFullPage={true} initialDisplay={20} forcedQuery={query} />

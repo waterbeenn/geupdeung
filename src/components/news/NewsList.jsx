@@ -1,140 +1,56 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import axios from 'axios';
+import { useState } from 'react';
+import { DEFAULT_CATEGORY, NEWS_CATEGORIES } from '../../lib/news/categories';
+import { useNewsFeed } from '../../hooks/useNewsFeed';
 import NewsItem from './NewsItem';
-import { NEWS_CATEGORIES, DEFAULT_CATEGORY } from '../../api/news/categories';
 import { NewsSkeletonList } from './NewsSkeleton';
 
 const NewsList = ({ limit, initialDisplay = 12, isFullPage = false, forcedQuery = null }) => {
-    const [news, setNews] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [loadingMore, setLoadingMore] = useState(false);
     const [activeCategory, setActiveCategory] = useState(DEFAULT_CATEGORY);
-    const [error, setError] = useState(null);
-    const [start, setStart] = useState(1);
-
-    const fetchNews = useCallback(
-        async (category, startPos, isAppend = false) => {
-            isAppend ? setLoadingMore(true) : setLoading(true);
-            const fetchCount = 100;
-            const displayCount = isFullPage ? 20 : initialDisplay;
-            setError(null);
-
-            try {
-                const res = await axios.get(`/api/news`, {
-                    params: {
-                        query: category.query,
-                        display: fetchCount,
-                        start: startPos,
-                        _t: Date.now(),
-                    },
-                });
-
-                const items = res.data.items || [];
-
-                const stripHtml = (html) => html.replace(/<[^>]*>?/gm, '');
-
-                let filtered = items;
-
-                if (category.name !== '전체') {
-                    filtered = items.filter((item) => {
-                        const content = stripHtml(item.title + item.description);
-                        const matchName = content.includes(category.name.replace('/', ''));
-                        const matchQuery = category.query.split(' ').some((q) => {
-                            const cleanQ = q.replace('+', '').trim();
-                            return cleanQ.length > 0 && content.includes(cleanQ);
-                        });
-                        return matchName || matchQuery;
-                    });
-                }
-
-                // 1. 데이터 가공 및 날짜 객체 생성
-                const processedItems = items.map(item => ({
-                    ...item,
-                    pubDateObj: new Date(item.pubDate)
-                }));
-
-                // 2. '유사도' 상위권 내에서 '최신순'으로 재정렬
-                const sortedItems = processedItems.sort((a, b) => b.pubDateObj - a.pubDateObj);
-
-                setNews((prev) => {
-                    const combined = isAppend ? [...prev, ...sortedItems] : sortedItems;
-                    const uniqueNews = Array.from(new Map(combined.map(item => [item.link, item])).values());
-                    return isFullPage ? uniqueNews : uniqueNews.slice(0, limit || initialDisplay);
-                });
-            } catch (err) {
-                setError('뉴스를 불러오는 중에 문제가 발생했습니다.');
-                console.error('뉴스 로드 실패:', err);
-            } finally {
-                setLoading(false);
-                setLoadingMore(false);
-            }
-        },
-        [initialDisplay, isFullPage, limit]
-    );
-
-    useEffect(() => {
-        setStart(1); // 시작점 초기화
-        const targetQuery = forcedQuery
-            ? { name: forcedQuery, query: forcedQuery }
-            : activeCategory;
-        fetchNews(targetQuery, 1, false);
-    }, [activeCategory, fetchNews, forcedQuery]);
-
-    const handleLoadMore = () => {
-        const displayCount = isFullPage ? 20 : initialDisplay;
-        const nextStart = start + displayCount;
-        setStart(nextStart);
-        const targetCategory = forcedQuery
-            ? { name: forcedQuery, query: forcedQuery }
-            : activeCategory;
-
-        fetchNews(targetCategory, nextStart, true);
-    };
-
-    const displayedNews = limit ? news.slice(0, limit) : news;
+    const { news, loading, loadingMore, error, hasMore, loadMore } = useNewsFeed({
+        activeCategory,
+        forcedQuery,
+        initialDisplay,
+        isFullPage,
+        limit,
+    });
 
     return (
         <section className="news-section">
             {!forcedQuery && <h2>최신 경제 뉴스</h2>}
             {!limit && !forcedQuery && (
                 <div className="news-tabs">
-                    {NEWS_CATEGORIES.map((cat) => (
+                    {NEWS_CATEGORIES.map((category) => (
                         <button
-                            key={cat.name}
-                            className={`tab-btn ${activeCategory.name === cat.name ? 'active' : ''}`}
-                            onClick={() => setActiveCategory(cat)}
+                            key={category.name}
+                            className={`tab-btn ${activeCategory.name === category.name ? 'active' : ''}`}
+                            onClick={() => setActiveCategory(category)}
                         >
-                            {cat.name}
+                            {category.name}
                         </button>
                     ))}
                 </div>
             )}
             <div className="news-content-area">
                 {error && <div className="error-message">{error}</div>}
-
                 {loading && news.length === 0 ? (
                     <NewsSkeletonList count={isFullPage ? 8 : 4} />
                 ) : (
                     <ul className={`news-list ${isFullPage ? 'full-view' : ''}`}>
-                        {displayedNews.map((item) => (
+                        {news.map((item) => (
                             <NewsItem key={item.link} {...item} />
                         ))}
                     </ul>
                 )}
                 {loadingMore && <NewsSkeletonList count={4} />}
-                {isFullPage && !limit && (
+                {isFullPage && !limit && hasMore && (
                     <div className="load-more-container">
-                        <button
-                            className="load-more-btn"
-                            onClick={handleLoadMore}
-                            disabled={loadingMore}
-                        >
+                        <button className="load-more-btn" onClick={loadMore} disabled={loadingMore}>
                             {loadingMore
                                 ? '불러오는 중...'
                                 : forcedQuery
-                                    ? `'${forcedQuery}' 기사 더보기 +`
+                                    ? `${forcedQuery} 기사 더보기 +`
                                     : '뉴스 더보기 +'}
                         </button>
                     </div>

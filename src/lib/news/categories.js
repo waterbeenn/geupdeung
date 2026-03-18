@@ -1,5 +1,3 @@
-// src/constants/newsCategories.js
-
 export const NEWS_CATEGORIES = [
     { name: '전체', query: '주식 경제' },
     { name: '경제', query: '금리 인플레이션 경기침체 환율' },

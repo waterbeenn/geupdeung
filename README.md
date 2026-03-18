@@ -1,53 +1,83 @@
-# Geupdeung (급등)
+# Geupdeung
 
-이 프로젝트는 국내에서 급등하는 주식 정보와 최신 경제 뉴스를 사용자에게 제공하는 웹 애플리케이션입니다. 
+국내 급등주와 경제 뉴스를 보여주는 Next.js 포트폴리오 프로젝트입니다.  
+실시간 데이터가 아니며, 개장일 기준 하루 전 데이터를 보여줍니다.
+예를 들어 금요일 데이터는 월요일에 보이게 됩니다. (개선 예정)
 
-## ✨ 주요 기능
-- **실시간 주가지수**: 주요 주가지수 정보를 실시간으로 표시합니다.
-- **TOP 100 급등주 목록**: 가장 많이 상승한 100개 주식의 순위, 현재가, 등락률 정보를 제공합니다.
-- **최신 경제 뉴스**: 주요 경제 뉴스를 카테고리별로 필터링하여 볼 수 있습니다.
+## 핵심 포인트
 
-## 💻 기술 스택
+- 뉴스와 급등주를 한 화면에서 빠르게 확인할 수 있습니다.
+- 외부 API 호출은 브라우저가 아니라 Next.js 내부 API가 담당합니다.
+- UI, 상태 관리, 데이터 가공, 서버 로직을 분리해 구조를 읽기 쉽게 만들었습니다.
 
-- **Framework**: Next.js 14 (App Router)
-- **Library**: React 18
-- **Styling**: SCSS (Sass)
-- **HTTP Client**: Axios
-- **UI Components**: Swiper.js
+## 왜 이렇게 나눴는가
 
-## 🌐 API 활용
-이 프로젝트는 동적인 데이터 표시를 위해 외부 API를 활용합니다.
-Next.js의 API Route를 백엔드 프록시(proxy)로 사용하여 외부 API 키를 숨기고, 
-클라이언트 측에서는 이 API Route를 호출하는 안전한 방식으로 구현했습니다.
+- `src/app`
+  - Next.js 라우트와 내부 API 진입점입니다.
+  - 페이지와 서버 경계를 가장 먼저 보이게 하기 위해 따로 둡니다.
 
-- **주식 정보 API**:
-    - **기능**: 국내 주식의 TOP 100 순위, 개별 종목의 시세, 등락률 등 실시간 데이터를 가져옵니다.
-    - **구현**: `src/app/api/top100/` 경로에서 외부 금융 API를 호출하여 클라이언트에 필요한 형태로 가공한 후 제공합니다.
+- `src/components`
+  - 실제 화면 조각입니다.
+  - "무엇을 보여주는가"에 집중시키기 위해 데이터 호출 로직을 최대한 빼 두었습니다.
 
-- **뉴스 데이터 API**:
-    - **기능**: 네이버 검색 API를 활용하여 '경제', '증권' 등 특정 카테고리의 최신 뉴스를 수집합니다.
-    - **구현**: `src/app/api/news/` 경로에서 네이버 API를 호출하고, 수집된 데이터를 클라이언트에 전달하여 뉴스 목록을 생성합니다.
+- `src/hooks`
+  - 화면이 쓰는 상태와 fetch 흐름을 묶습니다.
+  - 컴포넌트를 가볍게 유지하고, 뉴스/급등주 흐름을 재사용하기 쉽게 하기 위한 분리입니다.
 
-## 🗂️ 프로젝트 구조
+- `src/lib`
+  - 데이터 가공과 서버 유틸입니다.
+  - API 응답 정규화, 필터링, 거래일 계산처럼 UI와 직접 관계없는 로직을 모아 둡니다.
 
-프로젝트의 주요 디렉터리 구조는 다음과 같습니다.
+## 파일 구조
 
+```text
+src/
+  app/
+    api/
+      news/          # 네이버 뉴스 프록시
+      top100/        # 급등주 데이터 제공
+      trading-day/   # 최신 거래일 계산 결과 제공
+    news/            # 뉴스 페이지
+    top100/          # 급등주 페이지
+    layout.js        # 공통 레이아웃
+    page.js          # 홈
+  components/
+    layout/          # Header, Footer
+    news/            # 뉴스 UI
+    shared/          # 공용 UI
+    top100/          # 급등주 UI
+  hooks/
+    useNewsFeed.js   # 뉴스 목록 상태/추가 로드
+    useTop100Stocks.js
+  lib/
+    news/            # 뉴스 정규화, 필터링, 카테고리
+    server/          # 서버 전용 유틸
+    top100/          # 급등주 응답 정규화
 ```
-.
-├── public/              # 정적 파일 (이미지, 폰트 등)
-├── src/
-│   ├── api/             # API 관련 로직 및 데이터 (뉴스 카테고리, 목 데이터 등)
-│   ├── app/             # Next.js App Router 기반 페이지 및 라우팅
-│   │   ├── /            # 메인 페이지 (page.js)
-│   │   ├── news/        # 뉴스 전체 목록 페이지
-│   │   └── top100/      # 급등주 전체 목록 페이지
-│   ├── components/      # 재사용 가능한 UI 컴포넌트
-│   │   ├── common/      # 로딩, 차트 등 공통 컴포넌트
-│   │   ├── layout/      # Header, Footer 등 레이아웃 컴포넌트
-│   │   ├── main/        # 메인 페이지 관련 컴포넌트
-│   │   ├── news/        # 뉴스 관련 컴포넌트 (NewsList, NewsItem)
-│   │   └── top100/      # 급등주 관련 컴포넌트 (Top100List, TopItem)
-│   └── hooks/           # 커스텀 훅 (데이터 페칭, 페이지네이션 등)
-├── next.config.ts       # Next.js 설정 파일
-└── package.json         # 프로젝트 의존성 및 스크립트
-```
+
+## 데이터 흐름
+
+- 뉴스
+  - `components/news` -> `hooks/useNewsFeed` -> `/api/news` -> Naver API
+
+- 급등주
+  - `components/top100` -> `hooks/useTop100Stocks` -> `/api/top100` -> 공공데이터 API
+
+이 구조를 택한 이유는, 브라우저가 외부 API 키나 응답 구조를 직접 알지 않게 하기 위해서입니다.
+
+## 실행
+
+- `npm run dev`
+- `npm run typecheck`
+- `npm run lint`
+- `npm run build`
+
+## 환경변수
+
+- `STOCK_API_BASE_URL`
+- `HOLIDAY_API_BASE_URL`
+- `STOCK_SERVICE_KEY`
+- `NAVER_CLIENT_ID`
+- `NAVER_CLIENT_SECRET`
+
+예시는 `.env.example`에 있습니다.
