@@ -1,6 +1,6 @@
 import { config } from 'dotenv';
 import { resolve } from 'path';
-config({ path: resolve(__dirname, '../../.env') });
+config({ path: resolve(__dirname, '../.env') });
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -14,7 +14,9 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+    origin: process.env.CLIENT_ORIGIN || 'http://localhost:5173',
+}));
 
 const globalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
