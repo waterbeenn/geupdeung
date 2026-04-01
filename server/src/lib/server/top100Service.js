@@ -20,8 +20,6 @@ export const fetchTop100Stocks = async (limit = 100) => {
     resultType: "json",
   }).toString();
 
-  console.log("[top100Service] public data request:", requestUrl.toString());
-
   const response = await axios.get(
     requestUrl.toString(),
     {

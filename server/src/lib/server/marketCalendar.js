@@ -55,7 +55,6 @@ export const getLatestTradingDay = async (referenceDate = new Date()) => {
 
     while (true) {
         const isWeekend = target.getDay() === 0 || target.getDay() === 6;
-        console.log('[marketCalendar] checking date:', formatTradingDate(target), target.toISOString());
 
         if (isWeekend) {
             target.setDate(target.getDate() - 1);
@@ -68,7 +67,6 @@ export const getLatestTradingDay = async (referenceDate = new Date()) => {
             continue;
         }
 
-        console.log('[marketCalendar] selected trading day:', tradingDay);
         return tradingDay;
     }
 };

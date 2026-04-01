@@ -11,8 +11,16 @@ const parsePositiveNumber = (value: string | undefined, fallback: number, max: n
     return Math.min(parsed, max);
 };
 
+const sanitizeQuery = (value: string): string => {
+    return value
+        .trim()
+        .slice(0, 100)
+        .replace(/[<>"'&]/g, '');
+};
+
 router.get('/', async (req: Request, res: Response) => {
-    const query = (req.query.query as string) || '경제';
+    const rawQuery = (req.query.query as string) || '';
+    const query = sanitizeQuery(rawQuery) || '경제';
     const display = parsePositiveNumber(req.query.display as string, 12, 100);
     const start = parsePositiveNumber(req.query.start as string, 1, 1000);
     const cacheKey = `news:${query}:${start}:${display}`;

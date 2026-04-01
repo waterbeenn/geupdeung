@@ -31,13 +31,9 @@ const fetchIndexByName = async (baseUrl, serviceKey, basDt, idxNm) => {
         resultType: 'json',
     }).toString();
 
-    console.log(`[indexService] requesting ${idxNm}:`, url.toString());
-
     const response = await axios.get(url.toString(), { timeout: 10000 });
     const rawItems = response.data.response?.body?.items?.item;
     const items = Array.isArray(rawItems) ? rawItems : rawItems ? [rawItems] : [];
-
-    console.log(`[indexService] ${idxNm} 응답 idxNm 목록:`, items.map((i) => JSON.stringify(i.idxNm)));
 
     return (
         items.find((i) => i.idxNm?.trim() === idxNm) ||
@@ -51,15 +47,10 @@ export const fetchMarketIndex = async () => {
     const baseUrl = getIndexApiBaseUrl();
     const serviceKey = getServiceKey();
 
-    console.log('[indexService] fetching KOSPI + KOSDAQ for:', tradingDay);
-
     const [kospiRaw, kosdaqRaw] = await Promise.all([
         fetchIndexByName(baseUrl, serviceKey, tradingDay, '코스피'),
         fetchIndexByName(baseUrl, serviceKey, tradingDay, '코스닥'),
     ]);
-
-    console.log('[indexService] kospi raw idxNm:', kospiRaw?.idxNm ?? 'null');
-    console.log('[indexService] kosdaq raw idxNm:', kosdaqRaw?.idxNm ?? 'null');
 
     return {
         tradingDay,
