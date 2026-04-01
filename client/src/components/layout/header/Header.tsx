@@ -25,16 +25,23 @@ const Header = () => {
     if (statusText.includes("개장 전")) return "before";
     return "closed";
   };
-  const getActiveSection = (path: string): string => (pathname === path ? "active" : "");
+  const getActiveSection = (path: string): string =>
+    pathname === path ? "active" : "";
 
   return (
     <header className="main-header">
       <div className="header-inner">
         {/* 1. 로고 영역 */}
         <div className="logo">
-          <span className="logo-icon" aria-hidden="true">📈</span>
+          <img
+            src="/logo.png"
+            alt=""
+            className="logo-icon"
+            aria-hidden="true"
+            style={{ height: "clamp(1rem, 4vw, 1.35rem)", width: "auto" }}
+          />
           <Link to="/" className={getActiveSection("/")}>
-            <h1>StockDash</h1>
+            <h1>급등이</h1>
           </Link>
         </div>
 
