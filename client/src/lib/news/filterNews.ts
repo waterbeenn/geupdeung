@@ -1,8 +1,10 @@
+import type { NewsItem, NewsCategory } from '../../types';
 import { stripHtmlTags } from './normalizeNews';
 
-const normalizeToken = (value) => value.replace('/', ' ').replace(/\+/g, ' ').trim().toLowerCase();
+const normalizeToken = (value: string): string =>
+    value.replace('/', ' ').replace(/\+/g, ' ').trim().toLowerCase();
 
-export const filterNewsItems = (items = [], category) => {
+export const filterNewsItems = (items: NewsItem[] = [], category: NewsCategory): NewsItem[] => {
     if (!category || category.name === '전체') {
         return items;
     }

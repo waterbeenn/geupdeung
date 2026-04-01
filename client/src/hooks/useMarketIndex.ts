@@ -1,42 +1,49 @@
 import { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
+import type { MarketIndexData, UseMarketIndexReturn } from '../types';
 
 const CACHE_KEY = 'swr_market_index';
 
-const readCache = () => {
+interface CacheData {
+    kospi: MarketIndexData | null;
+    kosdaq: MarketIndexData | null;
+    tradingDay: string | null;
+}
+
+const readCache = (): CacheData | null => {
     try {
         const raw = sessionStorage.getItem(CACHE_KEY);
-        return raw ? JSON.parse(raw) : null;
+        return raw ? (JSON.parse(raw) as CacheData) : null;
     } catch {
         return null;
     }
 };
 
-const writeCache = (data) => {
+const writeCache = (data: CacheData): void => {
     try {
         sessionStorage.setItem(CACHE_KEY, JSON.stringify(data));
     } catch {}
 };
 
-export const useMarketIndex = () => {
+export const useMarketIndex = (): UseMarketIndexReturn => {
     const cached = readCache();
 
-    const [kospi, setKospi] = useState(cached?.kospi || null);
-    const [kosdaq, setKosdaq] = useState(cached?.kosdaq || null);
-    const [tradingDay, setTradingDay] = useState(cached?.tradingDay || null);
-    const [loading, setLoading] = useState(!cached);
-    const [error, setError] = useState(null);
-    const [retryCount, setRetryCount] = useState(0);
+    const [kospi, setKospi] = useState<MarketIndexData | null>(cached?.kospi ?? null);
+    const [kosdaq, setKosdaq] = useState<MarketIndexData | null>(cached?.kosdaq ?? null);
+    const [tradingDay, setTradingDay] = useState<string | null>(cached?.tradingDay ?? null);
+    const [loading, setLoading] = useState<boolean>(!cached);
+    const [error, setError] = useState<string | null>(null);
+    const [retryCount, setRetryCount] = useState<number>(0);
 
     useEffect(() => {
         let isMounted = true;
 
-        const fetchIndex = async () => {
+        const fetchIndex = async (): Promise<void> => {
             setError(null);
             if (!readCache()) setLoading(true);
 
             try {
-                const { data } = await axios.get('/api/market-index');
+                const { data } = await axios.get<CacheData>('/api/market-index');
                 if (!isMounted) return;
 
                 setKospi(data.kospi);

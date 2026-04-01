@@ -1,7 +1,9 @@
 import { useEffect, useRef } from 'react';
+import type { RefObject } from 'react';
+import type { UseInfiniteScrollParams } from '../types';
 
-export const useInfiniteScroll = ({ onLoadMore, hasMore, loading }) => {
-    const sentinelRef = useRef(null);
+export const useInfiniteScroll = ({ onLoadMore, hasMore, loading }: UseInfiniteScrollParams): RefObject<HTMLDivElement | null> => {
+    const sentinelRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
         if (!hasMore || loading) return;

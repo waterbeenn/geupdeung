@@ -1,4 +1,6 @@
-const NAMED_HTML_ENTITIES = {
+import type { RawNewsItem, NewsItem } from '../../types';
+
+const NAMED_HTML_ENTITIES: Record<string, string> = {
     amp: '&',
     apos: "'",
     gt: '>',
@@ -7,10 +9,10 @@ const NAMED_HTML_ENTITIES = {
     quot: '"',
 };
 
-export const decodeHtmlEntities = (value = '') =>
-    value.replace(/&(#x?[0-9a-f]+|[a-z]+);/gi, (entity, code) => {
+export const decodeHtmlEntities = (value = ''): string =>
+    value.replace(/&(#x?[0-9a-f]+|[a-z]+);/gi, (entity, code: string) => {
         const normalizedCode = code.toLowerCase();
-        const decodeCodePoint = (parsed) => {
+        const decodeCodePoint = (parsed: number): string => {
             if (!Number.isInteger(parsed) || parsed < 0 || parsed > 0x10ffff) {
                 return entity;
             }
@@ -33,14 +35,15 @@ export const decodeHtmlEntities = (value = '') =>
         return NAMED_HTML_ENTITIES[normalizedCode] ?? entity;
     });
 
-export const stripHtmlTags = (value = '') => decodeHtmlEntities(value.replace(/<[^>]*>/g, '')).trim();
+export const stripHtmlTags = (value = ''): string =>
+    decodeHtmlEntities(value.replace(/<[^>]*>/g, '')).trim();
 
-const toTimestamp = (value) => {
+const toTimestamp = (value: string): number => {
     const date = new Date(value);
     return Number.isNaN(date.getTime()) ? 0 : date.getTime();
 };
 
-export const normalizeNewsItems = (items = []) => {
+export const normalizeNewsItems = (items: RawNewsItem[] = []): NewsItem[] => {
     const sorted = [...items]
         .map((item) => ({
             link: item.link,

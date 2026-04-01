@@ -1,46 +1,52 @@
 import axios from 'axios';
 import { useEffect, useState, useCallback } from 'react';
+import type { Top100Item, UseTop100StocksReturn } from '../types';
 
 const CACHE_KEY = 'swr_top100';
 
-const readCache = () => {
+interface CacheData {
+    items: Top100Item[];
+    tradingDay: string;
+}
+
+const readCache = (): CacheData | null => {
     try {
         const raw = localStorage.getItem(CACHE_KEY);
-        return raw ? JSON.parse(raw) : null;
+        return raw ? (JSON.parse(raw) as CacheData) : null;
     } catch {
         return null;
     }
 };
 
-const writeCache = (data) => {
+const writeCache = (data: CacheData): void => {
     try {
         localStorage.setItem(CACHE_KEY, JSON.stringify(data));
     } catch {}
 };
 
-export const useTop100Stocks = (limit = 100) => {
+export const useTop100Stocks = (limit = 100): UseTop100StocksReturn => {
     const cached = readCache();
 
-    const [items, setItems] = useState(cached?.items || []);
-    const [tradingDay, setTradingDay] = useState(cached?.tradingDay || '');
-    const [loading, setLoading] = useState(!cached);
-    const [error, setError] = useState(null);
-    const [retryCount, setRetryCount] = useState(0);
+    const [items, setItems] = useState<Top100Item[]>(cached?.items ?? []);
+    const [tradingDay, setTradingDay] = useState<string>(cached?.tradingDay ?? '');
+    const [loading, setLoading] = useState<boolean>(!cached);
+    const [error, setError] = useState<string | null>(null);
+    const [retryCount, setRetryCount] = useState<number>(0);
 
     useEffect(() => {
         let isMounted = true;
 
-        const fetchTop100 = async () => {
+        const fetchTop100 = async (): Promise<void> => {
             if (!readCache()) setLoading(true);
             setError(null);
 
             try {
-                const response = await axios.get('/api/top100', { params: { limit } });
+                const response = await axios.get<{ items: Top100Item[]; tradingDay: string }>('/api/top100', { params: { limit } });
                 if (!isMounted) return;
 
-                const fresh = {
-                    items: response.data.items || [],
-                    tradingDay: response.data.tradingDay || '',
+                const fresh: CacheData = {
+                    items: response.data.items ?? [],
+                    tradingDay: response.data.tradingDay ?? '',
                 };
                 setItems(fresh.items);
                 setTradingDay(fresh.tradingDay);

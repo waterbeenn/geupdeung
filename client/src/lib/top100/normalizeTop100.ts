@@ -1,9 +1,11 @@
-const toNumber = (value) => {
+import type { RawTop100Item, Top100Item } from '../../types';
+
+const toNumber = (value: string | number): number => {
     const parsed = Number(value);
     return Number.isFinite(parsed) ? parsed : 0;
 };
 
-export const normalizeTop100Items = (items = []) =>
+export const normalizeTop100Items = (items: RawTop100Item[] = []): Top100Item[] =>
     [...items]
         .sort((left, right) => toNumber(right.fltRt) - toNumber(left.fltRt))
         .map((item, index) => {
