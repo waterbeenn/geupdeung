@@ -11,17 +11,21 @@ import TopItem from "./TopItem";
 
 const PAGE_SIZE = 20;
 
-const formatTradingDay = (tradingDay) => {
+const formatTradingDay = (tradingDay: string): string => {
   if (!tradingDay || tradingDay.length !== 8) return tradingDay;
   return `${tradingDay.slice(0, 4)}.${tradingDay.slice(4, 6)}.${tradingDay.slice(6, 8)}`;
 };
 
-const Top100List = ({ limit = 100 }) => {
+interface Top100ListProps {
+  limit?: number;
+}
+
+const Top100List = ({ limit = 100 }: Top100ListProps) => {
   const navigate = useNavigate();
   const { items, tradingDay, loading, error, retry } = useTop100Stocks(limit);
-  const [displayCount, setDisplayCount] = useState(PAGE_SIZE);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedStock, setSelectedStock] = useState("");
+  const [displayCount, setDisplayCount] = useState<number>(PAGE_SIZE);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [selectedStock, setSelectedStock] = useState<string>("");
 
   const visibleItems = useMemo(() => items.slice(0, displayCount), [items, displayCount]);
   const hasMore = !loading && displayCount < items.length;
@@ -32,7 +36,7 @@ const Top100List = ({ limit = 100 }) => {
 
   const sentinelRef = useInfiniteScroll({ onLoadMore: loadMore, hasMore, loading });
 
-  const handleStockClick = (name) => {
+  const handleStockClick = (name: string): void => {
     setSelectedStock(name);
     setIsModalOpen(true);
   };

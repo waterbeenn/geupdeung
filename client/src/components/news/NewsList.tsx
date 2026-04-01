@@ -2,11 +2,19 @@ import { useState } from 'react';
 import { DEFAULT_CATEGORY, NEWS_CATEGORIES } from '../../lib/news/categories';
 import { useNewsFeed } from '../../hooks/useNewsFeed';
 import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
+import type { NewsCategory } from '../../types';
 import NewsItem from './NewsItem';
 import { NewsSkeletonList } from './NewsSkeleton';
 
-const NewsList = ({ limit, initialDisplay = 12, isFullPage = false, forcedQuery = null }) => {
-    const [activeCategory, setActiveCategory] = useState(DEFAULT_CATEGORY);
+interface NewsListProps {
+    limit?: number;
+    initialDisplay?: number;
+    isFullPage?: boolean;
+    forcedQuery?: string | null;
+}
+
+const NewsList = ({ limit, initialDisplay = 12, isFullPage = false, forcedQuery = null }: NewsListProps) => {
+    const [activeCategory, setActiveCategory] = useState<NewsCategory>(DEFAULT_CATEGORY);
     const { news, loading, loadingMore, error, hasMore, loadMore, retry } = useNewsFeed({
         activeCategory,
         forcedQuery,

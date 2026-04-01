@@ -1,8 +1,21 @@
-const TopItem = ({ rank, name, code, priceText, changeText, percent, percentText, onItemClick }) => {
+import type { Top100Item } from '../../types';
+
+interface TopItemProps extends Top100Item {
+    onItemClick: (name: string) => void;
+}
+
+const TopItem = ({ rank, name, code, priceText, changeText, percent, percentText, onItemClick }: TopItemProps) => {
     const statusClass = percent > 0 ? 'up' : percent < 0 ? 'down' : 'zero';
 
     return (
-        <li className="top100-item" onClick={() => onItemClick(name)}>
+        <li
+            className="top100-item"
+            onClick={() => onItemClick(name)}
+            onKeyDown={(e) => e.key === 'Enter' && onItemClick(name)}
+            role="button"
+            tabIndex={0}
+            aria-label={`${name} 관련 뉴스 보기`}
+        >
             <div className="rank">{rank}</div>
             <div className="name-group">
                 <span className="name">{name}</span>

@@ -1,5 +1,6 @@
-// 시장 상태를 판별하는 함수
-export const getMarketStatus = () => {
+import type { MarketStatus } from '../../../types';
+
+export const getMarketStatus = (): MarketStatus => {
     const now = new Date();
 
     // 1. 한국 시장 상태 (KST: UTC+9)
@@ -11,7 +12,7 @@ export const getMarketStatus = () => {
         weekday: 'short',
     })
         .formatToParts(now)
-        .reduce((acc, part) => ({ ...acc, [part.type]: part.value }), {});
+        .reduce<Record<string, string>>((acc, part) => ({ ...acc, [part.type]: part.value }), {});
 
     const korHour = parseInt(korTime.hour);
     const korMinute = parseInt(korTime.minute);
@@ -35,7 +36,7 @@ export const getMarketStatus = () => {
         weekday: 'short',
     })
         .formatToParts(now)
-        .reduce((acc, part) => ({ ...acc, [part.type]: part.value }), {});
+        .reduce<Record<string, string>>((acc, part) => ({ ...acc, [part.type]: part.value }), {});
 
     const usaHour = parseInt(usaTime.hour);
     const usaMinute = parseInt(usaTime.minute);

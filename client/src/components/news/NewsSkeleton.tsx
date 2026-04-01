@@ -1,3 +1,7 @@
+interface NewsSkeletonListProps {
+    count?: number;
+}
+
 const NewsSkeleton = () => {
     return (
         <li className="news-item skeleton">
@@ -11,7 +15,7 @@ const NewsSkeleton = () => {
     );
 };
 
-export const NewsSkeletonList = ({ count = 6 }) => {
+export const NewsSkeletonList = ({ count = 6 }: NewsSkeletonListProps) => {
     return (
         <ul className="news-list">
             {Array(count)

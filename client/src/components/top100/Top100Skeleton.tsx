@@ -1,3 +1,7 @@
+interface Top100SkeletonListProps {
+    count?: number;
+}
+
 const Top100Skeleton = () => {
     return (
         <li className="top100-item skeleton">
@@ -17,7 +21,7 @@ const Top100Skeleton = () => {
     );
 };
 
-export const Top100SkeletonList = ({ count = 10 }) => {
+export const Top100SkeletonList = ({ count = 10 }: Top100SkeletonListProps) => {
     return (
         <>
             {Array(count)

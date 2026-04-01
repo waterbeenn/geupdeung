@@ -1,6 +1,13 @@
 import { useMemo } from 'react';
+import type { Top100Item, MarketIndexData } from '../../types';
 
-const IndexCard = ({ label, data, loading }) => {
+interface IndexCardProps {
+    label: string;
+    data: MarketIndexData | null;
+    loading: boolean;
+}
+
+const IndexCard = ({ label, data, loading }: IndexCardProps) => {
     const isUp = data ? parseFloat(data.fltRt) >= 0 : null;
     const sign = isUp ? '▲' : '▼';
     const colorClass = isUp ? 'up' : 'down';
@@ -22,7 +29,16 @@ const IndexCard = ({ label, data, loading }) => {
     );
 };
 
-const MarketSummary = ({ items, tradingDay, loading, kospi, kosdaq, indexLoading }) => {
+interface MarketSummaryProps {
+    items: Top100Item[];
+    tradingDay: string;
+    loading: boolean;
+    kospi: MarketIndexData | null;
+    kosdaq: MarketIndexData | null;
+    indexLoading: boolean;
+}
+
+const MarketSummary = ({ items, tradingDay, loading, kospi, kosdaq, indexLoading }: MarketSummaryProps) => {
     const stats = useMemo(() => {
         if (!items.length) return null;
         const avgPercent = (
@@ -32,7 +48,7 @@ const MarketSummary = ({ items, tradingDay, loading, kospi, kosdaq, indexLoading
         return { avgPercent, top };
     }, [items]);
 
-    const formatDay = (d) =>
+    const formatDay = (d: string): string =>
         d && d.length === 8
             ? `${d.slice(0, 4)}.${d.slice(4, 6)}.${d.slice(6, 8)}`
             : d;
@@ -40,7 +56,7 @@ const MarketSummary = ({ items, tradingDay, loading, kospi, kosdaq, indexLoading
     return (
         <div className="market-summary">
             <div className="market-summary-header">
-                <span className="market-summary-title">📊 시장 요약</span>
+                <span className="market-summary-title"><span aria-hidden="true">📊</span> 시장 요약</span>
                 {tradingDay && (
                     <span className="market-summary-date">{formatDay(tradingDay)} 기준</span>
                 )}

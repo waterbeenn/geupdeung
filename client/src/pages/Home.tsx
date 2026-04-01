@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTop100Stocks } from '../hooks/useTop100Stocks';
 import { useMarketIndex } from '../hooks/useMarketIndex';
@@ -6,6 +7,7 @@ import NewsList from '../components/news/NewsList';
 import MarketSummary from '../components/home/MarketSummary';
 
 export default function Home() {
+    useEffect(() => { document.title = 'StockDash - 급등주 & 경제 뉴스 대시보드'; }, []);
     const navigate = useNavigate();
     const { items, tradingDay, loading } = useTop100Stocks(100);
     const { kospi, kosdaq, loading: indexLoading } = useMarketIndex();

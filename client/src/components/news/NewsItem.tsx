@@ -1,5 +1,8 @@
+import type { NewsItem as NewsItemType } from '../../types';
 
-const NewsItem = ({ link, title, description, pubDate }) => {
+type NewsItemProps = Pick<NewsItemType, 'link' | 'title' | 'description' | 'pubDate'>;
+
+const NewsItem = ({ link, title, description, pubDate }: NewsItemProps) => {
     return (
         <li className="news-item">
             <a href={link} target="_blank" rel="noopener noreferrer">
