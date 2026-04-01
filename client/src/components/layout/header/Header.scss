@@ -1,0 +1,209 @@
+$primary-blue: #2563eb;
+$border-color: #e5e7eb;
+$text-main: #1f2937;
+$market-open: #059669;
+$market-before: #d97706;
+$market-closed: #6b7280;
+
+.main-header {
+    width: 100%;
+    height: 64px;
+    background-color: #ffffff;
+    border-bottom: 1px solid $border-color;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100;
+
+    .header-inner {
+        max-width: 1200px;
+        height: 100%;
+        margin: 0 auto;
+        padding: 0 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .logo {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        h1 {
+            font-size: clamp(1rem, 4vw, 1.35rem);
+            font-weight: 800;
+            color: $primary-blue;
+        }
+    }
+
+    .hamburger-btn {
+        display: none; // PC에서는 숨김
+        flex-direction: column;
+        justify-content: space-between;
+        width: 30px;
+        height: 21px;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        z-index: 101;
+        margin-left: auto;
+
+        span {
+            display: block;
+            width: 100%;
+            height: 3px;
+            background-color: $text-main;
+            border-radius: 3px;
+            transition: all 0.3s ease;
+        }
+
+        &.active {
+            span:nth-child(1) {
+                transform: translateY(9px) rotate(45deg);
+            }
+
+            span:nth-child(2) {
+                opacity: 0;
+            }
+
+            span:nth-child(3) {
+                transform: translateY(-9px) rotate(-45deg);
+            }
+        }
+    }
+
+    .header-menu {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+
+        ul {
+            display: flex;
+            gap: 40px;
+            list-style: none;
+
+            li {
+                a {
+                    text-decoration: none;
+                    color: #4b5563;
+                    font-weight: 600;
+                    font-size: clamp(0.9rem, 1.5vw, 1rem);
+                    transition: color 0.2s ease;
+
+                    &:hover {
+                        color: $primary-blue;
+                    }
+
+                    &.active {
+                        color: $primary-blue;
+                    }
+                }
+            }
+        }
+    }
+
+    // 모바일 반응형 스타일
+    @media (max-width: 768px) {
+        .header-inner {
+            padding: 0 16px;
+        }
+
+        .hamburger-btn {
+            display: flex;
+            margin-left: 20px;
+        }
+
+        .header-menu {
+            position: fixed;
+            top: 63px;
+            right: 0;
+            width: 40%;
+            height: 20vh;
+            background-color: #ffffff;
+            flex-direction: column;
+            justify-content: flex-start;
+            padding: 2rem;
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+            z-index: 99;
+            border-top: 1px solid $border-color;
+            border-left: 1px solid $border-color;
+            box-shadow: -5px 5px 15px rgba(0, 0, 0, 0.1);
+
+            &.mobile-open {
+                transform: translateX(0);
+            }
+
+            ul {
+                flex-direction: column;
+                gap: 2rem;
+                width: 100%;
+                text-align: center;
+
+                li a {
+                    font-size: clamp(0.9rem, 4vw, 1.25rem);
+                    display: block;
+                    padding: 10px;
+                }
+            }
+        }
+
+        .status-container {
+            display: flex;
+            margin-left: auto;
+        }
+    }
+
+    .status-container {
+        display: flex;
+        gap: 12px;
+
+
+        .market-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background-color: #f3f4f6;
+
+            .dot {
+                width: 7px;
+                height: 7px;
+                border-radius: 50%;
+                background-color: #9ca3af;
+            }
+
+            &.open {
+                color: $market-open;
+                background-color: #ecfdf5;
+
+                .dot {
+                    background-color: $market-open;
+                }
+            }
+
+            &.before {
+                color: $market-before;
+                background-color: #fffbeb;
+
+                .dot {
+                    background-color: $market-before;
+                }
+            }
+
+            &.closed {
+                color: $market-closed;
+                background-color: #f3f4f6;
+
+                .dot {
+                    background-color: $market-closed;
+                }
+            }
+        }
+    }
+}
