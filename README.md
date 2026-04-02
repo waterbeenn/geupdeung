@@ -5,14 +5,17 @@
 
 ---
 
-##메인탭
-![main](./docs/home.gif)
+## 메인탭
 
-##Top100탭
-![top100](./docs/top100.gif)
+<img src="./docs/home.gif" width="500" />
 
-##뉴스탭
-![news](./docs/news.gif)
+## Top100탭
+
+<img src="./docs/top100.gif" width="500" />
+
+## 뉴스탭
+
+<img src="./docs/news.gif" width="500" />
 
 ---
 
