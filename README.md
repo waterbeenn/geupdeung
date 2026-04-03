@@ -5,20 +5,6 @@
 
 ---
 
-## 메인탭
-
-<img src="./docs/home.gif" width="500" />
-
-## Top100탭
-
-<img src="./docs/top100.gif" width="500" />
-
-## 뉴스탭
-
-<img src="./docs/news.gif" width="500" />
-
----
-
 ## 기술 스택
 
 | 영역       | 스택                                                                         |
@@ -36,6 +22,90 @@
 - **경제뉴스** — 카테고리별 탐색 · 키워드 검색, 무한 스크롤
 - **UX** — React.lazy + Suspense 코드 스플리팅, ErrorBoundary, 404 페이지, Empty State, 재시도 버튼
 - **캐싱** — 서버 인메모리 캐시 (TTL) + 클라이언트 stale-while-revalidate (localStorage / sessionStorage)
+
+---
+
+## LightHouse 개선
+
+### SEO
+
+- `meta description`, Open Graph 태그 추가 (검색 결과 및 SNS 공유 미리보기)
+- `robots.txt`, `favicon.svg` 추가
+- 페이지별 동적 `document.title` 적용 (Home / Top100 / 뉴스)
+
+### Accessibility
+
+- `TopItem`: `<li onClick>` → `role="button"` + `tabIndex` + `onKeyDown` 추가로 키보드 접근성 확보
+- `Modal`: `role="dialog"`, `aria-modal` 추가, focus trap 및 Esc 키 닫기 구현
+- 장식용 이모지에 `aria-hidden="true"` 추가 (스크린리더 불필요 읽기 방지)
+- 검색 `<input>`에 `<label>` 및 `aria-label` 추가
+- `user-scalable=no` 제거 (모바일 확대 허용, WCAG 준수)
+- Footer 헤딩 계층 수정 (`h3` → `h2`, h1 → h2 → h3 순서 준수)
+
+### Performance
+
+- 페이지 컴포넌트(Top100, News, NotFound)에 `React.lazy` + `Suspense` 적용
+  - 기존: 조건부 렌더링 로직으로 직접 처리
+  - 변경: 라우트 진입 시점에 번들을 분리 로드해 초기 번들 크기 감소
+- `reset.css`를 `style.scss`에 통합해 CSS 파일 요청 1건 감소
+
+| 개선 전                                    | 개선 후                                   |
+| ------------------------------------------ | ----------------------------------------- |
+| ![before_home](./docs/before_home.png)     | ![after_home](./docs/after_home.png)      |
+| ![before_top100](./docs/before_top100.png) | ![before_top100](./docs/after_top100.png) |
+| ![before_news](./docs/before_news.png)     | ![before_news](./docs/after_news.png)     |
+
+---
+
+## 보안 개선 이력
+
+### 1. Rate Limiting 없음
+
+**문제** — API 엔드포인트에 요청 횟수 제한이 없어, 반복 호출로 네이버 API · 공공데이터포털의 일일 할당량을 소진시킬 수 있었습니다.
+**해결** — `express-rate-limit` 미들웨어를 적용해 **IP당 15분에 최대 200회**로 제한합니다. 초과 시 429 응답을 반환합니다.
+
+```ts
+// server/src/index.ts
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 200,
+  message: { error: "요청이 너무 많습니다. 잠시 후 다시 시도해 주세요." },
+});
+app.use(globalLimiter);
+```
+
+---
+
+### 2. 뉴스 검색 쿼리 미검증
+
+**문제** — `/api/news`의 `query` 파라미터를 길이 제한이나 문자 필터 없이 Naver API에 그대로 전달하고 있었습니다.
+**해결** — `sanitizeQuery` 함수를 추가해 최대 100자 제한 및 HTML 특수문자(`< > " ' &`)를 제거합니다.
+
+```ts
+// server/src/routes/news.ts
+const sanitizeQuery = (value: string): string => {
+  return value
+    .trim()
+    .slice(0, 100)
+    .replace(/[<>"'&]/g, "");
+};
+```
+
+---
+
+### 3. HTTP 보안 헤더 미적용
+
+**문제** — 응답에 보안 헤더가 없어 XSS, 클릭재킹, MIME 스니핑 등의 공격에 노출될 수 있었습니다.
+**해결** — `helmet` 미들웨어를 적용해 아래 헤더를 응답에 자동으로 포함시킵니다.
+
+| 헤더                              | 효과                       |
+| --------------------------------- | -------------------------- |
+| `X-Content-Type-Options: nosniff` | MIME 타입 스니핑 방지      |
+| `X-Frame-Options: SAMEORIGIN`     | 클릭재킹(iframe 삽입) 방지 |
+| `Strict-Transport-Security`       | HTTPS 강제 적용            |
+| `Content-Security-Policy`         | 허용된 리소스 출처 제한    |
+
+![security-header](./docs/header.png)
 
 ---
 
@@ -84,114 +154,16 @@ Browser
 
 ---
 
-## 환경변수
+# 결과
 
-루트에 `.env` 파일을 생성하고 아래 값을 설정합니다.
+## 메인탭
 
-```env
-# 공공데이터포털 (data.go.kr) — 주식시세 · 지수 서비스
-STOCK_API_BASE_URL=
-HOLIDAY_API_BASE_URL=
-STOCK_SERVICE_KEY=
+<img src="./docs/home.gif" width="500" />
 
-# 네이버 개발자센터 — 뉴스 검색 API
-NAVER_CLIENT_ID=
-NAVER_CLIENT_SECRET=
-```
+## Top100탭
 
-> `STOCK_API_BASE_URL`은 `GetStockSecuritiesInfoService` 까지 포함한 전체 경로를 입력합니다.
+<img src="./docs/top100.gif" width="500" />
 
----
+## 뉴스탭
 
-## 보안 개선 이력
-
-### 1. API 키 로그 노출
-
-**문제** — 서버 내부에서 외부 API 호출 시 서비스 키가 포함된 전체 URL을 `console.log`로 출력하고 있었습니다. 서버 로그가 유출될 경우 API 키가 그대로 노출될 위험이 있었습니다.
-
-**해결** — `top100Service.js`, `indexService.js`, `marketCalendar.js`의 URL 및 디버그 로그를 전부 제거했습니다.
-
----
-
-### 2. Rate Limiting 없음
-
-**문제** — API 엔드포인트에 요청 횟수 제한이 없어, 반복 호출로 네이버 API · 공공데이터포털의 일일 할당량을 소진시킬 수 있었습니다.
-
-**해결** — `express-rate-limit` 미들웨어를 적용해 **IP당 15분에 최대 200회**로 제한합니다. 초과 시 429 응답을 반환합니다.
-
-```ts
-// server/src/index.ts
-const globalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 200,
-  message: { error: "요청이 너무 많습니다. 잠시 후 다시 시도해 주세요." },
-});
-app.use(globalLimiter);
-```
-
----
-
-### 3. 뉴스 검색 쿼리 미검증
-
-**문제** — `/api/news`의 `query` 파라미터를 길이 제한이나 문자 필터 없이 Naver API에 그대로 전달하고 있었습니다.
-
-**해결** — `sanitizeQuery` 함수를 추가해 최대 100자 제한 및 HTML 특수문자(`< > " ' &`)를 제거합니다.
-
-```ts
-// server/src/routes/news.ts
-const sanitizeQuery = (value: string): string => {
-  return value
-    .trim()
-    .slice(0, 100)
-    .replace(/[<>"'&]/g, "");
-};
-```
-
----
-
-### 4. HTTP 보안 헤더 미적용
-
-**문제** — 응답에 보안 헤더가 없어 XSS, 클릭재킹, MIME 스니핑 등의 공격에 노출될 수 있었습니다.
-
-**해결** — `helmet` 미들웨어를 적용해 아래 헤더를 응답에 자동으로 포함시킵니다.
-
-| 헤더                              | 효과                       |
-| --------------------------------- | -------------------------- |
-| `X-Content-Type-Options: nosniff` | MIME 타입 스니핑 방지      |
-| `X-Frame-Options: SAMEORIGIN`     | 클릭재킹(iframe 삽입) 방지 |
-| `Strict-Transport-Security`       | HTTPS 강제 적용            |
-| `Content-Security-Policy`         | 허용된 리소스 출처 제한    |
-
-![security-header](./docs/header.png)
-
----
-
-## LightHouse 개선
-
-### SEO
-
-- `meta description`, Open Graph 태그 추가 (검색 결과 및 SNS 공유 미리보기)
-- `robots.txt`, `favicon.svg` 추가
-- 페이지별 동적 `document.title` 적용 (Home / Top100 / 뉴스)
-
-### Accessibility
-
-- `TopItem`: `<li onClick>` → `role="button"` + `tabIndex` + `onKeyDown` 추가로 키보드 접근성 확보
-- `Modal`: `role="dialog"`, `aria-modal` 추가, focus trap 및 Esc 키 닫기 구현
-- 장식용 이모지에 `aria-hidden="true"` 추가 (스크린리더 불필요 읽기 방지)
-- 검색 `<input>`에 `<label>` 및 `aria-label` 추가
-- `user-scalable=no` 제거 (모바일 확대 허용, WCAG 준수)
-- Footer 헤딩 계층 수정 (`h3` → `h2`, h1 → h2 → h3 순서 준수)
-
-### Performance
-
-- 페이지 컴포넌트(Top100, News, NotFound)에 `React.lazy` + `Suspense` 적용
-  - 기존: 조건부 렌더링 로직으로 직접 처리
-  - 변경: 라우트 진입 시점에 번들을 분리 로드해 초기 번들 크기 감소
-- `reset.css`를 `style.scss`에 통합해 CSS 파일 요청 1건 감소
-
-| 개선 전                                    | 개선 후                                   |
-| ------------------------------------------ | ----------------------------------------- |
-| ![before_home](./docs/before_home.png)     | ![after_home](./docs/after_home.png)      |
-| ![before_top100](./docs/before_top100.png) | ![before_top100](./docs/after_top100.png) |
-| ![before_news](./docs/before_news.png)     | ![before_news](./docs/after_news.png)     |
+<img src="./docs/news.gif" width="500" />
