@@ -1,5 +1,5 @@
 import { config } from 'dotenv';
-import { resolve } from 'path';
+import { resolve, join } from 'path';
 config({ path: resolve(__dirname, '../.env') });
 import express from 'express';
 import cors from 'cors';
@@ -29,10 +29,22 @@ app.use(globalLimiter);
 
 app.use(express.json());
 
+// 정적 파일 제공 (클라이언트 빌드 폴더)
+const clientDistPath = join(__dirname, '../../client/dist');
+app.use(express.static(clientDistPath, {
+    maxAge: '1d',
+    etag: false,
+}));
+
 app.use('/api/news', newsRouter);
 app.use('/api/top100', top100Router);
 app.use('/api/trading-day', tradingDayRouter);
 app.use('/api/market-index', marketIndexRouter);
+
+// SPA fallback: 매칭되지 않은 경로는 index.html로
+app.get('*', (req, res) => {
+    res.sendFile(join(clientDistPath, 'index.html'));
+});
 
 app.listen(PORT, () => {
     console.log(`[server] listening on http://localhost:${PORT}`);
