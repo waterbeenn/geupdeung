@@ -54,7 +54,7 @@
 
 - `TopItem`: `<li onClick>` → `role="button"` + `tabIndex` + `onKeyDown` 추가로 키보드 접근성 확보
 - `Modal`: `role="dialog"`, `aria-modal` 추가, focus trap 및 Esc 키 닫기 구현
-- 장식용 이모지에 `aria-hidden="true"` 추가 (스크린리더 불필요 읽기 방지)
+- 장식용 이모지에 `aria-hidden="true"` 추가 (스크린리더 불필요한 읽기 방지)
 - 검색 `<input>`에 `<label>` 및 `aria-label` 추가
 - `user-scalable=no` 제거 (모바일 확대 허용, WCAG 준수)
 - Footer 헤딩 계층 수정 (`h3` → `h2`, h1 → h2 → h3 순서 준수)
@@ -137,23 +137,26 @@ const sanitizeQuery = (value: string): string => {
 
 ```ts
 // server/src/index.ts
-const clientDistPath = join(__dirname, '../../client/dist');
+const clientDistPath = join(__dirname, "../../client/dist");
 
 // 정적 파일 제공 (캐시: 1일)
-app.use(express.static(clientDistPath, {
-    maxAge: '1d',
+app.use(
+  express.static(clientDistPath, {
+    maxAge: "1d",
     etag: false,
-}));
+  }),
+);
 
 // ... API 라우터들 ...
 
 // SPA fallback: 매칭되지 않은 경로는 index.html로
-app.get('*', (req, res) => {
-    res.sendFile(join(clientDistPath, 'index.html'));
+app.get("*", (req, res) => {
+  res.sendFile(join(clientDistPath, "index.html"));
 });
 ```
 
 **효과:**
+
 - ✅ 프로덕션에서 Express 단일 서버로 배포 가능
 - ✅ 정적 파일도 helmet 보안 헤더와 함께 제공 (XSS 방지, MIME 스니핑 방지 등)
 - ✅ SPA 라우팅 지원 (React Router 페이지 새로고침 시 정상 작동)
