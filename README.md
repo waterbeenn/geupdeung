@@ -129,6 +129,37 @@ const sanitizeQuery = (value: string): string => {
 
 ---
 
+### 4. 프로덕션 배포 환경 개선
+
+**문제** — 개발 환경과 달리 프로덕션에서 Express 서버가 정적 파일(HTML, CSS, JS)을 제공하지 않아, 별도 웹 서버(Nginx, Apache)가 필요했습니다. 또한 helmet 보안 헤더가 API 응답에만 적용되고 정적 파일은 보호되지 않았습니다.
+
+**해결** — Express에서 `express.static()` 미들웨어로 클라이언트 빌드 폴더를 제공하고, SPA 폴백 라우터를 추가합니다. 이제 프로덕션에서 Express 단일 서버로 정적 파일 + API를 통합 제공할 수 있으며, **모든 응답에 helmet 보안 헤더가 적용**됩니다.
+
+```ts
+// server/src/index.ts
+const clientDistPath = join(__dirname, '../../client/dist');
+
+// 정적 파일 제공 (캐시: 1일)
+app.use(express.static(clientDistPath, {
+    maxAge: '1d',
+    etag: false,
+}));
+
+// ... API 라우터들 ...
+
+// SPA fallback: 매칭되지 않은 경로는 index.html로
+app.get('*', (req, res) => {
+    res.sendFile(join(clientDistPath, 'index.html'));
+});
+```
+
+**효과:**
+- ✅ 프로덕션에서 Express 단일 서버로 배포 가능
+- ✅ 정적 파일도 helmet 보안 헤더와 함께 제공 (XSS 방지, MIME 스니핑 방지 등)
+- ✅ SPA 라우팅 지원 (React Router 페이지 새로고침 시 정상 작동)
+
+---
+
 ## 프로젝트 구조
 
 ```
