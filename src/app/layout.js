@@ -4,6 +4,7 @@ import './top100/style.scss';
 import './style.scss';
 import Header from '../components/layout/header/Header';
 import Footer from '../components/layout/footer/Footer';
+import Providers from './providers';
 
 export const metadata = {
     title: '주식 & 뉴스 앱',
@@ -21,11 +22,13 @@ export default function RootLayout({ children }) {
     return (
         <html lang="ko">
             <body suppressHydrationWarning={true}>
-                <div className="layout-container">
-                    <Header />
-                    <main className="content-area">{children}</main>
-                    <Footer />
-                </div>
+                <Providers>
+                    <div className="layout-container">
+                        <Header />
+                        <main className="content-area">{children}</main>
+                        <Footer />
+                    </div>
+                </Providers>
             </body>
         </html>
     );

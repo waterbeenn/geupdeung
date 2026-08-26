@@ -1,11 +1,13 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { fetchNews } from '../lib/news/fetchNews';
 import { filterNewsItems } from '../lib/news/filterNews';
 
 const createQueryCategory = (forcedQuery, activeCategory) =>
     forcedQuery ? { name: forcedQuery, query: forcedQuery } : activeCategory;
+
+const dedupeByLink = (items) => Array.from(new Map(items.map((item) => [item.link, item])).values());
 
 export const useNewsFeed = ({
     activeCategory,
@@ -15,80 +17,33 @@ export const useNewsFeed = ({
     limit,
 }) => {
     const pageSize = isFullPage ? initialDisplay : limit || initialDisplay;
-    const [news, setNews] = useState([]);
-    const [start, setStart] = useState(1);
-    const [loading, setLoading] = useState(true);
-    const [loadingMore, setLoadingMore] = useState(false);
-    const [error, setError] = useState(null);
-    const [hasMore, setHasMore] = useState(false);
+    const category = createQueryCategory(forcedQuery, activeCategory);
 
-    const loadNews = useCallback(
-        async (nextStart, shouldAppend) => {
-            const category = createQueryCategory(forcedQuery, activeCategory);
-
-            if (shouldAppend) {
-                setLoadingMore(true);
-            } else {
-                setLoading(true);
+    const { data, status, isFetchingNextPage, hasNextPage, fetchNextPage } = useInfiniteQuery({
+        queryKey: ['news', category.name, category.query, pageSize],
+        queryFn: ({ pageParam }) => fetchNews({ query: category.query, display: pageSize, start: pageParam }),
+        initialPageParam: 1,
+        getNextPageParam: (lastPage) => {
+            const filteredCount = filterNewsItems(lastPage.items || [], category).length;
+            if (!lastPage.hasMore || filteredCount === 0) {
+                return undefined;
             }
-            setError(null);
 
-            try {
-                const data = await fetchNews({
-                    query: category.query,
-                    display: pageSize,
-                    start: nextStart,
-                });
-
-                const filteredItems = filterNewsItems(data.items || [], category);
-
-                setNews((previousItems) => {
-                    const combined = shouldAppend ? [...previousItems, ...filteredItems] : filteredItems;
-                    const uniqueItems = Array.from(
-                        new Map(combined.map((item) => [item.link, item])).values()
-                    );
-
-                    if (isFullPage) {
-                        return uniqueItems;
-                    }
-
-                    return uniqueItems.slice(0, limit || initialDisplay);
-                });
-
-                setHasMore(Boolean(data.hasMore) && filteredItems.length > 0);
-                setStart(nextStart);
-            } catch {
-                setError('뉴스를 불러오는 중 문제가 발생했습니다.');
-            } finally {
-                setLoading(false);
-                setLoadingMore(false);
-            }
+            return lastPage.start + pageSize;
         },
-        [activeCategory, forcedQuery, initialDisplay, isFullPage, limit, pageSize]
-    );
+    });
 
-    useEffect(() => {
-        setNews([]);
-        setStart(1);
-        setHasMore(false);
-        loadNews(1, false);
-    }, [loadNews]);
-
-    const loadMore = useCallback(() => {
-        if (loadingMore || !hasMore) {
-            return;
-        }
-
-        const nextStart = start + pageSize;
-        loadNews(nextStart, true);
-    }, [hasMore, loadNews, loadingMore, pageSize, start]);
+    const uniqueItems = data
+        ? dedupeByLink(data.pages.flatMap((page) => filterNewsItems(page.items || [], category)))
+        : [];
+    const news = isFullPage ? uniqueItems : uniqueItems.slice(0, pageSize);
 
     return {
         news,
-        loading,
-        loadingMore,
-        error,
-        hasMore,
-        loadMore,
+        loading: status === 'pending',
+        loadingMore: isFetchingNextPage,
+        error: status === 'error' ? '뉴스를 불러오는 중 문제가 발생했습니다.' : null,
+        hasMore: Boolean(hasNextPage),
+        loadMore: fetchNextPage,
     };
 };
