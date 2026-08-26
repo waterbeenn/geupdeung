@@ -9,7 +9,7 @@
 
 | 영역       | 스택                                                                         |
 | ---------- | ---------------------------------------------------------------------------- |
-| 클라이언트 | Vite 6, React 19, react-router-dom v7, Sass, Axios                           |
+| 클라이언트 | Vite 6, React 19, react-router-dom v7, @tanstack/react-query, Sass, Axios     |
 | 서버       | Express 4, TypeScript, ts-node-dev, dotenv, cors, helmet, express-rate-limit |
 | 외부 API   | 공공데이터포털 주식시세 · 지수 · 휴일 API, 네이버 뉴스 검색 API              |
 | 배포       | Front - Vercel, Back - Render                                                |
@@ -22,7 +22,7 @@
 - **급등주 TOP100** — 무한 스크롤 (최대 100개), 종목 상세 모달
 - **경제뉴스** — 카테고리별 탐색 · 키워드 검색, 무한 스크롤
 - **UX** — React.lazy + Suspense 코드 스플리팅, ErrorBoundary, 404 페이지, Empty State, 재시도 버튼
-- **캐싱** — 서버 인메모리 캐시 (TTL) + 클라이언트 stale-while-revalidate (localStorage / sessionStorage)
+- **캐싱** — 서버 인메모리 캐시 (TTL) + 클라이언트 react-query 캐싱 (staleTime 기반, 카테고리 재방문 시 즉시 응답)
 
 ---
 
